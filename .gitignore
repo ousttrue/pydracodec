@@ -1,0 +1,3 @@
+*.pyc
+src/pydracodec/_version.py
+*.egg-info
