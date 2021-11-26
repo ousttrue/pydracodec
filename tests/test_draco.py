@@ -3,6 +3,7 @@ import os
 import pathlib
 import json
 import pydracodec
+import pydracodec.dracodec_unity
 import ctypes
 
 
@@ -38,12 +39,34 @@ class TestDraco(unittest.TestCase):
             case {'extensions': {'KHR_draco_mesh_compression': {'bufferView': bufferview_index, 'attributes': attributes}}}:
                 data = get_bufferview_bytes(path, gltf, bufferview_index)
                 with pydracodec.DecodeMesh(data) as mesh:
-                    print(f'{mesh.numFaces}')
+                    # print(f'{mesh.numFaces}')
                     indices = pydracodec.GetIndices(mesh, mesh.numFaces)
-                    print(f'{mesh.numVertices}')
-                    positions = pydracodec.GetPositions(mesh, mesh.numVertices)
-                    print(f'{mesh.numAttributes}')
-                    pass
+                    self.assertEqual(ctypes.c_uint, indices.element_type)
+
+                    # print(f'{mesh.numVertices}')
+                    # print(f'{mesh.numAttributes}')
+                    for k, v in attributes.items():
+                        match k:
+                            case 'POSITION':
+                                positions = pydracodec.GetAttribute(
+                                    mesh, pydracodec.dracodec_unity.AttributeType.POSITION, mesh.numVertices)
+                                self.assertEqual(3, positions.element_count)
+
+                            case 'NORMAL':
+                                normals = pydracodec.GetAttribute(
+                                    mesh, pydracodec.dracodec_unity.AttributeType.NORMAL, mesh.numVertices)
+                                self.assertEqual(3, normals.element_count)
+
+                            case 'TEXCOORD_0':
+                                uv = pydracodec.GetAttribute(
+                                    mesh, pydracodec.dracodec_unity.AttributeType.TEX_COORD, mesh.numVertices)
+                                self.assertEqual(2, uv.element_count)
+
+                            case 'TANGENT':
+                                pass
+
+                            case _:
+                                raise Exception()
 
             case _:
                 raise Exception()

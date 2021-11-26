@@ -1,8 +1,7 @@
 from . import dracodec_unity
 import contextlib
 import ctypes
-import array
-from typing import NamedTuple, Type
+from typing import NamedTuple, Type, Optional
 
 
 @contextlib.contextmanager
@@ -42,19 +41,18 @@ def GetIndices(dracoMesh: dracodec_unity.DracoMesh, faceCount: int) -> BufferRef
         dracodec_unity.ReleaseDracoData(ctypes.pointer(p))
 
 
-def GetPositions(dracoMesh: dracodec_unity.DracoMesh, numVertices: int):
-    # Copy positions.
+def GetAttribute(dracoMesh: dracodec_unity.DracoMesh, attr_type: dracodec_unity.AttributeType, numVertices: int) -> Optional[BufferReference]:
     ap = ctypes.POINTER(dracodec_unity.DracoAttribute)()
-    dracodec_unity.GetAttributeByType(
-        dracoMesh, dracodec_unity.AttributeType.POSITION, 0, ctypes.pointer(ap))
-    try:
-        attr = ap[0]
-        p = ctypes.POINTER(dracodec_unity.DracoData)()
-        dracodec_unity.GetAttributeData(dracoMesh, attr, ctypes.pointer(p))
+    if dracodec_unity.GetAttributeByType(dracoMesh, attr_type, 0, ctypes.pointer(ap)):
         try:
-            posData = p[0]
-            return BufferReference(posData.data, numVertices, dracodec_unity.DataType(posData.dataType).get_type(), attr.numComponents)
+            attr = ap[0]
+            p = ctypes.POINTER(dracodec_unity.DracoData)()
+
+            if dracodec_unity.GetAttributeData(dracoMesh, attr, ctypes.pointer(p)):
+                try:
+                    posData = p[0]
+                    return BufferReference(posData.data, numVertices, dracodec_unity.DataType(posData.dataType).get_type(), attr.numComponents)
+                finally:
+                    dracodec_unity.ReleaseDracoData(ctypes.pointer(p))
         finally:
-            dracodec_unity.ReleaseDracoData(ctypes.pointer(p))
-    finally:
-        dracodec_unity.ReleaseDracoAttribute(ctypes.pointer(ap))
+            dracodec_unity.ReleaseDracoAttribute(ctypes.pointer(ap))
