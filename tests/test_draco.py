@@ -39,8 +39,11 @@ class TestDraco(unittest.TestCase):
                 data = get_bufferview_bytes(path, gltf, bufferview_index)
                 with pydracodec.DecodeMesh(data) as mesh:
                     print(f'{mesh.numFaces}')
+                    indices = pydracodec.GetIndices(mesh, mesh.numFaces)
                     print(f'{mesh.numVertices}')
+                    positions = pydracodec.GetPositions(mesh, mesh.numVertices)
                     print(f'{mesh.numAttributes}')
+                    pass
 
             case _:
                 raise Exception()

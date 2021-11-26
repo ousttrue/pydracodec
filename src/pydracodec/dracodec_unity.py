@@ -3,6 +3,7 @@ https://github.com/google/draco/blob/e5eb9cd3f7e77f5c9a5dbbbb45a1f44a7db41e9d/un
 '''
 import ctypes
 from enum import IntEnum
+from typing import Type
 
 
 class DataType(IntEnum):
@@ -22,6 +23,33 @@ class DataType(IntEnum):
     DT_FLOAT32 = 9
     DT_FLOAT64 = 10
     DT_BOOL = 11
+
+    def get_type(self) -> Type[ctypes._SimpleCData]:
+        match self:
+            case DataType.DT_INT8:
+                return ctypes.c_byte
+            case DataType.DT_UINT8:
+                return ctypes.c_ubyte
+            case DataType.DT_INT16:
+                return ctypes.c_short
+            case DataType.DT_UINT16:
+                return ctypes.c_ushort
+            case DataType.DT_INT32:
+                return ctypes.c_int
+            case DataType.DT_UINT32:
+                return ctypes.c_uint
+            case DataType.DT_INT64:
+                return ctypes.c_longlong
+            case DataType.DT_UINT64:
+                return ctypes.c_ulonglong
+            case DataType.DT_FLOAT32:
+                return ctypes.c_float
+            case DataType.DT_FLOAT64:
+                return ctypes.c_double
+            case DataType.DT_BOOL:
+                return ctypes.c_bool
+            case _:
+                raise Exception()
 
 
 class AttributeType(IntEnum):
